@@ -1,19 +1,23 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/d-kuznetsov/chat/config"
-	// "github.com/d-kuznetsov/chat/logger"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there !!!, I love %s!", r.URL.Path[1:])
+	tmpl, err := template.New("").ParseFiles("templates/home.html", "templates/layout.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmpl.ExecuteTemplate(w, "layout", nil)
 }
 
 func main() {
 	http.HandleFunc("/", handler)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }
