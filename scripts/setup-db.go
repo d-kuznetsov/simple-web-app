@@ -41,8 +41,8 @@ func main() {
 	}
 	userCollection := client.Database("chat").Collection("users")
 	users := []interface{}{
-		User{"Vanya", "vanya123"},
-		User{"Katya", "katya123"},
+		User{"vanya", "1234"},
+		User{"katya", "1234"},
 	}
 	insertResult, err := userCollection.InsertMany(ctx, users)
 	if err != nil {
