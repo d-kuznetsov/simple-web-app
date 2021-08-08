@@ -13,7 +13,12 @@
           value="{{ .Username }}"
         />
         <label for="password">Password</label>
-        <input type="password" name="password" placeholder="Password" />
+        <input
+          type="text"
+          name="password"
+          placeholder="Password"
+          value="{{ .Password }}"
+        />
       </fieldset>
       <button type="submit">Submit</button>
       <button type="reset">Reset</button>

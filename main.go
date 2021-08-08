@@ -33,13 +33,18 @@ func main() {
 	})
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			if r.FormValue("username") == "user" && r.FormValue("password") == "1234" {
+			username, password := r.FormValue("username"), r.FormValue("password")
+			user, err := db.FindUserByName(username)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			if user != nil && user.Password == password {
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
 			renderTemplate(w, "login", LoginDetails{
-				r.FormValue("username"),
-				r.FormValue("password"),
+				username,
+				password,
 				"Data is incorrect",
 			})
 			return
