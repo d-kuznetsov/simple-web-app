@@ -6,9 +6,13 @@ import (
 	"net/http"
 
 	"github.com/d-kuznetsov/chat/config"
+	"github.com/d-kuznetsov/chat/db"
 )
 
 func main() {
+	db.Connect()
+	defer db.Close()
+
 	templates := map[string]*template.Template{
 		"login": template.Must(template.ParseFiles("templates/layout.html", "templates/login.html")),
 		"home":  template.Must(template.ParseFiles("templates/layout.html", "templates/home.html")),
