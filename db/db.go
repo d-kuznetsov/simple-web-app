@@ -74,3 +74,19 @@ func FindUserByName(name string) (*User, error) {
 	}
 	return &user, nil
 }
+
+func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
+	if client == nil {
+		log.Fatal("There isn't db client")
+	}
+	collection := client.Database("chat").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	user := User{
+		Username: username,
+		Password: password,
+	}
+	res, err := collection.InsertOne(ctx, user)
+	fmt.Println("user was created")
+	return res, err
+}

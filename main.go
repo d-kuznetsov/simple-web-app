@@ -14,8 +14,8 @@ func main() {
 	defer db.Close()
 
 	templates := map[string]*template.Template{
-		"login": template.Must(template.ParseFiles("templates/layout.html", "templates/login.html")),
-		"home":  template.Must(template.ParseFiles("templates/layout.html", "templates/home.html")),
+		"credentials": template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
+		"home":        template.Must(template.ParseFiles("templates/layout.html", "templates/home.html")),
 	}
 	renderTemplate := func(w http.ResponseWriter, tmplName string, tmplData interface{}) {
 		tmpl, ok := templates[tmplName]
@@ -42,15 +42,44 @@ func main() {
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
-			renderTemplate(w, "login", LoginDetails{
+			renderTemplate(w, "credentials", LoginDetails{
+				"Log In",
+				"/login",
 				username,
 				password,
-				"Data is incorrect",
+				"Username or password is incorrect",
 			})
 			return
 		}
 
-		renderTemplate(w, "login", nil)
+		renderTemplate(w, "credentials", LoginDetails{Label: "Log In", Action: "/login"})
+	})
+
+	http.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			username, password := r.FormValue("username"), r.FormValue("password")
+			user, err := db.FindUserByName(username)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+			if user != nil {
+				renderTemplate(w, "credentials", LoginDetails{
+					"Sign Up",
+					"/signup",
+					username,
+					password,
+					"User with this username already exists",
+				})
+				return
+			}
+			db.CreateUser(username, password)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		renderTemplate(w, "credentials", LoginDetails{
+			Label:  "Sign Up",
+			Action: "/signup",
+		})
 	})
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
@@ -58,6 +87,8 @@ func main() {
 }
 
 type LoginDetails struct {
+	Label    string
+	Action   string
 	Username string
 	Password string
 	Error    string
