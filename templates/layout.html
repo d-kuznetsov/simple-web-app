@@ -13,11 +13,12 @@
   </head>
   <body>
     <header>
-      <a href="#" class="logo">Logo</a>
       {{ if .IsAuthorized }}
       <a href="/logout" class="button">Log Out</a>
+      {{ else }}
+      <a href="/login" class="button">Log In</a>
+      <a href="/signup" class="button">Sign Up</a>
       {{ end }}
-      <button>Download</button>
     </header>
     <main class="container">{{template "content" .}}</main>
   </body>
