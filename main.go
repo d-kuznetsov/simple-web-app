@@ -35,7 +35,7 @@ func main() {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		renderTemplate(w, "home", nil)
+		renderTemplate(w, "home", LayoutTmplOptions{IsAuthorized: true})
 	})
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
@@ -49,19 +49,24 @@ func main() {
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
-			renderTemplate(w, "credentials", LoginDetails{
+			renderTemplate(w, "credentials", CredentialsTmplOptions{
 				"Log In",
 				"/login",
 				username,
 				password,
 				"Username or password is incorrect",
+				LayoutTmplOptions{IsAuthorized: false},
 			})
 			return
 		}
 		if session.IsAuthenticated(r) {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
-		renderTemplate(w, "credentials", LoginDetails{Label: "Log In", Action: "/login"})
+		renderTemplate(w, "credentials", CredentialsTmplOptions{
+			Label:             "Log In",
+			Action:            "/login",
+			LayoutTmplOptions: LayoutTmplOptions{IsAuthorized: false},
+		})
 	})
 
 	http.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
@@ -72,12 +77,13 @@ func main() {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}
 			if user != nil {
-				renderTemplate(w, "credentials", LoginDetails{
+				renderTemplate(w, "credentials", CredentialsTmplOptions{
 					"Sign Up",
 					"/signup",
 					username,
 					password,
 					"User with this username already exists",
+					LayoutTmplOptions{IsAuthorized: false},
 				})
 				return
 			}
@@ -89,20 +95,32 @@ func main() {
 		if session.IsAuthenticated(r) {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
-		renderTemplate(w, "credentials", LoginDetails{
+		renderTemplate(w, "credentials", CredentialsTmplOptions{
 			Label:  "Sign Up",
 			Action: "/signup",
+			LayoutTmplOptions: LayoutTmplOptions{
+				IsAuthorized: false,
+			},
 		})
+	})
+
+	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		session.Logout(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
 	})
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }
 
-type LoginDetails struct {
+type LayoutTmplOptions struct {
+	IsAuthorized bool
+}
+type CredentialsTmplOptions struct {
 	Label    string
 	Action   string
 	Username string
 	Password string
 	Error    string
+	LayoutTmplOptions
 }

@@ -14,7 +14,9 @@
   <body>
     <header>
       <a href="#" class="logo">Logo</a>
-      <a href="#" class="button">Home</a>
+      {{ if .IsAuthorized }}
+      <a href="/logout" class="button">Log Out</a>
+      {{ end }}
       <button>Download</button>
     </header>
     <main class="container">{{template "content" .}}</main>
