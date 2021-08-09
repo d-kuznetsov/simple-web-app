@@ -2,4 +2,7 @@ module github.com/d-kuznetsov/chat
 
 go 1.16
 
-require go.mongodb.org/mongo-driver v1.7.1 // indirect
+require (
+	github.com/gorilla/sessions v1.2.1 // indirect
+	go.mongodb.org/mongo-driver v1.7.1 // indirect
+)

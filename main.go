@@ -7,11 +7,13 @@ import (
 
 	"github.com/d-kuznetsov/chat/config"
 	"github.com/d-kuznetsov/chat/db"
+	"github.com/d-kuznetsov/chat/session"
 )
 
 func main() {
 	db.Connect()
 	defer db.Close()
+	session.CreateStore()
 
 	templates := map[string]*template.Template{
 		"credentials": template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
@@ -29,6 +31,10 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if !session.IsAuthenticated(r) {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
 		renderTemplate(w, "home", nil)
 	})
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +45,7 @@ func main() {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}
 			if user != nil && user.Password == password {
+				session.Login(w, r)
 				http.Redirect(w, r, "/", http.StatusFound)
 				return
 			}
@@ -51,7 +58,9 @@ func main() {
 			})
 			return
 		}
-
+		if session.IsAuthenticated(r) {
+			http.Redirect(w, r, "/", http.StatusFound)
+		}
 		renderTemplate(w, "credentials", LoginDetails{Label: "Log In", Action: "/login"})
 	})
 
@@ -73,8 +82,12 @@ func main() {
 				return
 			}
 			db.CreateUser(username, password)
+			session.Login(w, r)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
+		}
+		if session.IsAuthenticated(r) {
+			http.Redirect(w, r, "/", http.StatusFound)
 		}
 		renderTemplate(w, "credentials", LoginDetails{
 			Label:  "Sign Up",
