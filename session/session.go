@@ -1,8 +1,6 @@
 package session
 
 import (
-	//"fmt"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -22,7 +20,6 @@ func IsAuthenticated(r *http.Request) bool {
 	checkStore()
 	session, _ := store.Get(r, sessionName)
 	auth, ok := session.Values["authenticated"].(bool)
-	fmt.Println(auth, ok)
 	return auth && ok
 }
 
