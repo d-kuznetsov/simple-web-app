@@ -1,1 +1,7 @@
-{{define "content"}} Home {{end}}
+{{define "content"}}
+<ul>
+  {{range .Articles}}
+  <li>{{.Title}}</li>
+  {{end}}
+</ul>
+{{end}}

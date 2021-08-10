@@ -17,7 +17,14 @@ func GetRouter() *mux.Router {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		RenderTemplate(w, "home", LayoutTmplOptions{IsAuthorized: true})
+		articles, err := db.GetAllArticles()
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		RenderTemplate(w, "home", ArticleTmplOptions{
+			articles,
+			LayoutTmplOptions{IsAuthorized: true},
+		})
 	}).Methods("GET")
 
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {

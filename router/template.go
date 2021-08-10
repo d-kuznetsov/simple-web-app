@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/d-kuznetsov/chat/models"
 )
 
 var Templates = map[string]*template.Template{
@@ -32,5 +34,10 @@ type CredentialsTmplOptions struct {
 	Username string
 	Password string
 	Error    string
+	LayoutTmplOptions
+}
+
+type ArticleTmplOptions struct {
+	Articles []models.Article
 	LayoutTmplOptions
 }
