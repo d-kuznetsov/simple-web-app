@@ -19,6 +19,14 @@ type User struct {
 	Password string             `bson:"password,omitempty"`
 }
 
+type Article struct {
+	Id    primitive.ObjectID `bson:"_id,omitempty"`
+	Title string             `bson:"title,omitempty"`
+	Date  string             `bson:"date,omitempty"`
+	Text  string             `bson:"text,omitempty"`
+	User  primitive.ObjectID `bson:"user,omitempty"`
+}
+
 var client *mongo.Client
 
 func Connect() *mongo.Client {
@@ -89,4 +97,30 @@ func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
 	res, err := collection.InsertOne(ctx, user)
 	fmt.Println("user was created")
 	return res, err
+}
+
+func GetAllArticles() ([]Article, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("There are not any articles")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	var articles []Article
+	err = cursor.All(ctx, &articles)
+	if err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
+func checkClient() {
+	if client == nil {
+		log.Fatal("There isn't db client")
+	}
 }
