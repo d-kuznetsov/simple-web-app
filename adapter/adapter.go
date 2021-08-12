@@ -23,13 +23,28 @@ func GetAllArticles() ([]models.Article, error) {
 	arts, err := db.GetAllArticles()
 	var articles []models.Article
 	for _, val := range arts {
-		articles = append(articles, models.Article{
-			Id:    val.Id.Hex(),
-			Title: val.Title,
-			Date:  val.Date,
-			Text:  val.Text,
-			User:  val.User.Hex(),
-		})
+		articles = append(articles, *convertArticle(&val))
 	}
 	return articles, err
+}
+
+func GetArticleById(id string) (*models.Article, error) {
+	a, err := db.GetArticleById(id)
+	if err != nil {
+		return nil, err
+	}
+	return convertArticle(a), err
+}
+
+func convertArticle(a *db.Article) *models.Article {
+	if a == nil {
+		return nil
+	}
+	return &models.Article{
+		Id:    a.Id.Hex(),
+		Title: a.Title,
+		Date:  a.Date,
+		Text:  a.Text,
+		User:  a.User.Hex(),
+	}
 }

@@ -11,6 +11,7 @@ import (
 var Templates = map[string]*template.Template{
 	"credentials": template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
 	"articles":    template.Must(template.ParseFiles("templates/layout.html", "templates/articles.html")),
+	"article":     template.Must(template.ParseFiles("templates/layout.html", "templates/article.html")),
 }
 
 var RenderTemplate = func(w http.ResponseWriter, tmplName string, tmplData interface{}) {
@@ -39,5 +40,10 @@ type CredentialsTmplOptions struct {
 
 type ArticleTmplOptions struct {
 	Articles []models.Article
+	LayoutTmplOptions
+}
+
+type OneArticleTmplOptions struct {
+	models.Article
 	LayoutTmplOptions
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/d-kuznetsov/chat/config"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -102,6 +103,26 @@ func GetAllArticles() ([]Article, error) {
 		return nil, err
 	}
 	return articles, nil
+}
+
+func GetArticleById(id string) (*Article, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var article Article
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	err = collection.FindOne(ctx, bson.M{"_id": objId}).Decode(&article)
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("article does not exist")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &article, nil
 }
 
 func checkClient() {
