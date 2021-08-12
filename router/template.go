@@ -10,7 +10,7 @@ import (
 
 var Templates = map[string]*template.Template{
 	"credentials": template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
-	"home":        template.Must(template.ParseFiles("templates/layout.html", "templates/home.html")),
+	"articles":    template.Must(template.ParseFiles("templates/layout.html", "templates/articles.html")),
 }
 
 var RenderTemplate = func(w http.ResponseWriter, tmplName string, tmplData interface{}) {

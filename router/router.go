@@ -21,7 +21,7 @@ func GetRouter() *mux.Router {
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
-		RenderTemplate(w, "home", ArticleTmplOptions{
+		RenderTemplate(w, "articles", ArticleTmplOptions{
 			articles,
 			LayoutTmplOptions{IsAuthorized: true},
 		})

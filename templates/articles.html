@@ -1,0 +1,9 @@
+{{define "content"}}
+<ul>
+  {{range .Articles}}
+  <li>
+    <a href="/articles/{{.Id}}">{{.Title}}</a>
+  </li>
+  {{end}}
+</ul>
+{{end}}
