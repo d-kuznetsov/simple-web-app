@@ -125,6 +125,20 @@ func GetArticleById(id string) (*Article, error) {
 	return &article, nil
 }
 
+func CreateArticle(title, text string) (*mongo.InsertOneResult, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	article := Article{
+		Title: title,
+		Text:  text,
+	}
+	res, err := collection.InsertOne(ctx, article)
+	fmt.Println("article was created")
+	return res, err
+}
+
 func checkClient() {
 	if client == nil {
 		log.Fatal("There isn't db client")

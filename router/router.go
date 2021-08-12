@@ -115,7 +115,25 @@ func GetRouter() *mux.Router {
 			LayoutTmplOptions{IsAuthorized: true},
 		})
 
-	})
+	}).Methods("GET")
+
+	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
+		if !session.IsAuthenticated(r) {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+
+		RenderTemplate(w, "createArticle", LayoutTmplOptions{IsAuthorized: true})
+	}).Methods("GET")
+
+	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
+		title, text := r.FormValue("title"), r.FormValue("text")
+		err := adapter.CreateArticle(title, text)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		http.Redirect(w, r, "/", http.StatusFound)
+	}).Methods("POST")
 
 	return router
 }

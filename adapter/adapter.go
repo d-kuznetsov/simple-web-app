@@ -48,3 +48,8 @@ func convertArticle(a *db.Article) *models.Article {
 		User:  a.User.Hex(),
 	}
 }
+
+func CreateArticle(title, text string) error {
+	_, err := db.CreateArticle(title, text)
+	return err
+}
