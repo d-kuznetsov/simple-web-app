@@ -3,10 +3,9 @@ package router
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
-
-	"github.com/d-kuznetsov/chat/db"
+	"github.com/d-kuznetsov/chat/adapter"
 	"github.com/d-kuznetsov/chat/session"
+	"github.com/gorilla/mux"
 )
 
 func GetRouter() *mux.Router {
@@ -17,7 +16,7 @@ func GetRouter() *mux.Router {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		articles, err := db.GetAllArticles()
+		articles, err := adapter.GetAllArticles()
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
@@ -29,7 +28,7 @@ func GetRouter() *mux.Router {
 
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := db.FindUserByName(username)
+		user, err := adapter.FindUserByName(username)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
@@ -62,7 +61,7 @@ func GetRouter() *mux.Router {
 
 	router.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
 		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := db.FindUserByName(username)
+		user, err := adapter.FindUserByName(username)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
@@ -77,7 +76,7 @@ func GetRouter() *mux.Router {
 			})
 			return
 		}
-		db.CreateUser(username, password)
+		adapter.CreateUser(username, password)
 		session.Login(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}).Methods("POST")

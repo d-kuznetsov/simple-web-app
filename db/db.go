@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/d-kuznetsov/chat/config"
-	"github.com/d-kuznetsov/chat/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -51,11 +50,11 @@ func Close() {
 	fmt.Println("Connection to MongoDB is closed.")
 }
 
-func FindUserByName(name string) (*models.User, error) {
+func FindUserByName(name string) (*User, error) {
 	if client == nil {
 		log.Fatal("There isn't db client")
 	}
-	var user models.User
+	var user User
 	collection := client.Database("chat").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -76,7 +75,7 @@ func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
 	collection := client.Database("chat").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	user := models.User{
+	user := User{
 		Username: username,
 		Password: password,
 	}
@@ -85,7 +84,7 @@ func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
 	return res, err
 }
 
-func GetAllArticles() ([]models.Article, error) {
+func GetAllArticles() ([]Article, error) {
 	checkClient()
 	collection := client.Database("chat").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -97,7 +96,7 @@ func GetAllArticles() ([]models.Article, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	var articles []models.Article
+	var articles []Article
 	err = cursor.All(ctx, &articles)
 	if err != nil {
 		return nil, err
