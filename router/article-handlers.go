@@ -12,12 +12,13 @@ import (
 func OneArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
+		return
 	}
 	vars := mux.Vars(r)
 	article, err := adapter.GetArticleById(vars["id"])
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
 		return
 	}
 	RenderTemplate(w, "article", OneArticleTmplOptions{
@@ -29,7 +30,7 @@ func OneArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 func CreateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	RenderTemplate(w, "createArticle", LayoutTmplOptions{IsAuthorized: true})
@@ -38,27 +39,29 @@ func CreateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 func CreateArticlePostHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, userId := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	title, text := r.FormValue("title"), r.FormValue("text")
 	_, err := adapter.CreateArticle(title, text, userId)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/create-article", http.StatusFound)
 }
 
 func UpdateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	vars := mux.Vars(r)
 	a, err := adapter.GetArticleById(vars["id"])
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	RenderTemplate(w, "updateArticle", OneArticleTmplOptions{
 		*a,
@@ -69,30 +72,34 @@ func UpdateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 func UpdateArticlePostHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, userId := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	id, title, text := r.FormValue("id"), r.FormValue("title"), r.FormValue("text")
-	a, _ := adapter.GetArticleById(id)
-	if a.User != userId {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	article, _ := adapter.GetArticleById(id)
+	if article.User != userId {
+		ThrowServerError(w)
+		return
 	}
 	err := adapter.UpdateArticle(id, title, text)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	http.Redirect(w, r, "/", http.StatusFound)
+	RedirectToArticles(w, r)
 }
 
 func ArticlesOfUserGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, userId := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	articles, err := adapter.GetArticlesByUserId(userId)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	RenderTemplate(w, "articlesOfUser", ArticleTmplOptions{
 		articles,
@@ -103,13 +110,14 @@ func ArticlesOfUserGetHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteArticlesPostHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	r.ParseForm()
 	err := adapter.DeleteArticlesByIds(r.Form["articles"])
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	http.Redirect(w, r, "/my-articles", http.StatusFound)
 }

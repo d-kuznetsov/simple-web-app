@@ -10,12 +10,13 @@ import (
 func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if !isAuthenticated {
-		http.Redirect(w, r, "/login", http.StatusFound)
+		RedirectToLogIn(w, r)
 		return
 	}
 	articles, err := adapter.GetAllArticles()
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	RenderTemplate(w, "articles", ArticleTmplOptions{
 		articles,
@@ -26,7 +27,8 @@ func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {
 func LogInGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if isAuthenticated {
-		http.Redirect(w, r, "/", http.StatusFound)
+		RedirectToArticles(w, r)
+		return
 	}
 	RenderTemplate(w, "credentials", CredentialsTmplOptions{
 		Label:             "Log In",
@@ -39,11 +41,12 @@ func LogInPostHandler(w http.ResponseWriter, r *http.Request) {
 	username, password := r.FormValue("username"), r.FormValue("password")
 	user, err := adapter.FindUserByName(username)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	if user != nil && user.Password == password {
 		session.Login(w, r, user.Id)
-		http.Redirect(w, r, "/", http.StatusFound)
+		RedirectToArticles(w, r)
 		return
 	}
 	RenderTemplate(w, "credentials", CredentialsTmplOptions{
@@ -59,7 +62,8 @@ func LogInPostHandler(w http.ResponseWriter, r *http.Request) {
 func SignUpGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if isAuthenticated {
-		http.Redirect(w, r, "/", http.StatusFound)
+		RedirectToArticles(w, r)
+		return
 	}
 	RenderTemplate(w, "credentials", CredentialsTmplOptions{
 		Label:  "Sign Up",
@@ -74,7 +78,8 @@ func SignUpPostHandler(w http.ResponseWriter, r *http.Request) {
 	username, password := r.FormValue("username"), r.FormValue("password")
 	user, err := adapter.FindUserByName(username)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
+		return
 	}
 	if user != nil {
 		RenderTemplate(w, "credentials", CredentialsTmplOptions{
@@ -89,14 +94,14 @@ func SignUpPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	userId, err := adapter.CreateUser(username, password)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		ThrowServerError(w)
 		return
 	}
 	session.Login(w, r, userId)
-	http.Redirect(w, r, "/", http.StatusFound)
+	RedirectToArticles(w, r)
 }
 
 func LogOutHandler(w http.ResponseWriter, r *http.Request) {
 	session.Logout(w, r)
-	http.Redirect(w, r, "/", http.StatusFound)
+	RedirectToArticles(w, r)
 }
