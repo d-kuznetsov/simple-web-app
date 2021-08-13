@@ -149,5 +149,22 @@ func GetRouter() *mux.Router {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}).Methods("POST")
 
+	router.HandleFunc("/update-article/{id}", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		vars := mux.Vars(r)
+		a, err := adapter.GetArticleById(vars["id"])
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		RenderTemplate(w, "updateArticle", OneArticleTmplOptions{
+			*a,
+			LayoutTmplOptions{IsAuthorized: true},
+		})
+	}).Methods("GET")
+
 	return router
 }

@@ -13,6 +13,7 @@ var Templates = map[string]*template.Template{
 	"articles":      template.Must(template.ParseFiles("templates/layout.html", "templates/articles.html")),
 	"article":       template.Must(template.ParseFiles("templates/layout.html", "templates/article.html")),
 	"createArticle": template.Must(template.ParseFiles("templates/layout.html", "templates/create-article.html")),
+	"updateArticle": template.Must(template.ParseFiles("templates/layout.html", "templates/update-article.html")),
 }
 
 var RenderTemplate = func(w http.ResponseWriter, tmplName string, tmplData interface{}) {
