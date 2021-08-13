@@ -4,9 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/sessions"
-
 	"github.com/d-kuznetsov/chat/config"
+	"github.com/gorilla/sessions"
 )
 
 var store *sessions.CookieStore
@@ -16,17 +15,24 @@ func CreateStore() {
 	store = sessions.NewCookieStore([]byte(config.SessionKey))
 }
 
-func IsAuthenticated(r *http.Request) bool {
+func IsAuthenticated(r *http.Request) (bool, string) {
 	checkStore()
 	session, _ := store.Get(r, sessionName)
 	auth, ok := session.Values["authenticated"].(bool)
-	return auth && ok
+	var id string
+	if session.Values["user-id"] == nil {
+		id = ""
+	} else {
+		id = session.Values["user-id"].(string)
+	}
+	return auth && ok, id
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request, id string) {
 	checkStore()
 	session, _ := store.Get(r, sessionName)
 	session.Values["authenticated"] = true
+	session.Values["user-id"] = id
 	session.Save(r, w)
 }
 
@@ -34,6 +40,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	checkStore()
 	session, _ := store.Get(r, sessionName)
 	session.Values["authenticated"] = false
+	session.Values["user-id"] = ""
 	session.Save(r, w)
 }
 

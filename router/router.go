@@ -12,7 +12,8 @@ func GetRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if !session.IsAuthenticated(r) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if !isAuthenticated {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
@@ -33,7 +34,7 @@ func GetRouter() *mux.Router {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 		if user != nil && user.Password == password {
-			session.Login(w, r)
+			session.Login(w, r, user.Id)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -49,7 +50,8 @@ func GetRouter() *mux.Router {
 	}).Methods("POST")
 
 	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		if session.IsAuthenticated(r) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if isAuthenticated {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 		RenderTemplate(w, "credentials", CredentialsTmplOptions{
@@ -76,13 +78,18 @@ func GetRouter() *mux.Router {
 			})
 			return
 		}
-		adapter.CreateUser(username, password)
-		session.Login(w, r)
+		userId, err := adapter.CreateUser(username, password)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		session.Login(w, r, userId)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}).Methods("POST")
 
 	router.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
-		if session.IsAuthenticated(r) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if isAuthenticated {
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 		RenderTemplate(w, "credentials", CredentialsTmplOptions{
@@ -100,7 +107,8 @@ func GetRouter() *mux.Router {
 	})
 
 	router.HandleFunc("/articles/{id}", func(w http.ResponseWriter, r *http.Request) {
-		if !session.IsAuthenticated(r) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if !isAuthenticated {
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 		vars := mux.Vars(r)
@@ -118,7 +126,8 @@ func GetRouter() *mux.Router {
 	}).Methods("GET")
 
 	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
-		if !session.IsAuthenticated(r) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if !isAuthenticated {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
@@ -127,8 +136,13 @@ func GetRouter() *mux.Router {
 	}).Methods("GET")
 
 	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated, userId := session.IsAuthenticated(r)
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
 		title, text := r.FormValue("title"), r.FormValue("text")
-		err := adapter.CreateArticle(title, text)
+		err := adapter.CreateArticle(title, text, userId)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}

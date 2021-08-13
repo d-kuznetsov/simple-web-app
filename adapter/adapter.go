@@ -14,9 +14,9 @@ func FindUserByName(name string) (*models.User, error) {
 	}, err
 }
 
-func CreateUser(username, password string) error {
-	_, err := db.CreateUser(username, password)
-	return err
+func CreateUser(username, password string) (string, error) {
+	objId, err := db.CreateUser(username, password)
+	return objId.Hex(), err
 }
 
 func GetAllArticles() ([]models.Article, error) {
@@ -49,7 +49,7 @@ func convertArticle(a *db.Article) *models.Article {
 	}
 }
 
-func CreateArticle(title, text string) error {
-	_, err := db.CreateArticle(title, text)
+func CreateArticle(title, text, userId string) error {
+	_, err := db.CreateArticle(title, text, userId)
 	return err
 }

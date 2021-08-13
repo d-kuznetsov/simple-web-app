@@ -69,7 +69,7 @@ func FindUserByName(name string) (*User, error) {
 	return &user, nil
 }
 
-func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
+func CreateUser(username, password string) (primitive.ObjectID, error) {
 	if client == nil {
 		log.Fatal("There isn't db client")
 	}
@@ -82,7 +82,7 @@ func CreateUser(username, password string) (*mongo.InsertOneResult, error) {
 	}
 	res, err := collection.InsertOne(ctx, user)
 	fmt.Println("user was created")
-	return res, err
+	return res.InsertedID.(primitive.ObjectID), err
 }
 
 func GetAllArticles() ([]Article, error) {
@@ -125,14 +125,16 @@ func GetArticleById(id string) (*Article, error) {
 	return &article, nil
 }
 
-func CreateArticle(title, text string) (*mongo.InsertOneResult, error) {
+func CreateArticle(title, text, userId string) (*mongo.InsertOneResult, error) {
 	checkClient()
 	collection := client.Database("chat").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	objId, _ := primitive.ObjectIDFromHex(userId)
 	article := Article{
 		Title: title,
 		Text:  text,
+		User:  objId,
 	}
 	res, err := collection.InsertOne(ctx, article)
 	fmt.Println("article was created")
