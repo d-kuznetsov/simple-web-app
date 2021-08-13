@@ -192,7 +192,7 @@ func GetRouter() *mux.Router {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		articles, err := adapter.GetArticlesOfUser(userId)
+		articles, err := adapter.GetArticlesByUserId(userId)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}

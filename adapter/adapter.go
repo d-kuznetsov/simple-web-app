@@ -59,8 +59,8 @@ func UpdateArticle(id, title, text string) error {
 	return err
 }
 
-func GetArticlesOfUser(userId string) ([]models.Article, error) {
-	arts, err := db.GetArticlesOfUser(userId)
+func GetArticlesByUserId(userId string) ([]models.Article, error) {
+	arts, err := db.GetArticlesByUserId(userId)
 	var articles []models.Article
 	for _, val := range arts {
 		articles = append(articles, *convertArticle(&val))
