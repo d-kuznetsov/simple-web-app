@@ -2,9 +2,10 @@
 <div class="row">
   <div class="col-sm-3"></div>
   <div class="col-sm-6">
-    <form action="update-article" method="POST">
+    <form action="/update-article" method="POST">
       <fieldset>
         <legend>Update article</legend>
+        <input type="hidden" name="id" value="{{ .Id }}" />
         <label for="title">Title</label>
         <input
           type="text"

@@ -53,3 +53,8 @@ func CreateArticle(title, text, userId string) error {
 	_, err := db.CreateArticle(title, text, userId)
 	return err
 }
+
+func UpdateArticle(id, title, text string) error {
+	_, err := db.UpdateArticle(id, title, text)
+	return err
+}

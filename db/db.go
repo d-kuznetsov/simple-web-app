@@ -141,6 +141,19 @@ func CreateArticle(title, text, userId string) (*mongo.InsertOneResult, error) {
 	return res, err
 }
 
+func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	objId, _ := primitive.ObjectIDFromHex(id)
+	res, err := collection.UpdateByID(ctx, objId, bson.D{
+		{"$set", bson.M{"title": title, "text": text}},
+	})
+	fmt.Println("article was updated")
+	return res, err
+}
+
 func checkClient() {
 	if client == nil {
 		log.Fatal("There isn't db client")

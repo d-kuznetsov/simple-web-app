@@ -166,5 +166,24 @@ func GetRouter() *mux.Router {
 		})
 	}).Methods("GET")
 
+	router.HandleFunc("/update-article", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated, userId := session.IsAuthenticated(r)
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		id, title, text := r.FormValue("id"), r.FormValue("title"), r.FormValue("text")
+		a, _ := adapter.GetArticleById(id)
+		if a.User != userId {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		err := adapter.UpdateArticle(id, title, text)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+
+		http.Redirect(w, r, "/", http.StatusFound)
+	}).Methods("POST")
+
 	return router
 }
