@@ -5,37 +5,6 @@ import (
 	"github.com/d-kuznetsov/chat/models"
 )
 
-func FindUserByName(name string) (*models.User, error) {
-	u, err := db.FindUserByName(name)
-	return &models.User{
-		Id:       u.Id.Hex(),
-		Username: u.Username,
-		Password: u.Password,
-	}, err
-}
-
-func CreateUser(username, password string) (string, error) {
-	objId, err := db.CreateUser(username, password)
-	return objId.Hex(), err
-}
-
-func GetAllArticles() ([]models.Article, error) {
-	arts, err := db.GetAllArticles()
-	var articles []models.Article
-	for _, val := range arts {
-		articles = append(articles, *convertArticle(&val))
-	}
-	return articles, err
-}
-
-func GetArticleById(id string) (*models.Article, error) {
-	a, err := db.GetArticleById(id)
-	if err != nil {
-		return nil, err
-	}
-	return convertArticle(a), err
-}
-
 func convertArticle(a *db.Article) *models.Article {
 	if a == nil {
 		return nil
@@ -49,9 +18,40 @@ func convertArticle(a *db.Article) *models.Article {
 	}
 }
 
-func CreateArticle(title, text, userId string) error {
-	_, err := db.CreateArticle(title, text, userId)
-	return err
+func FindUserByName(name string) (*models.User, error) {
+	dbUser, err := db.FindUserByName(name)
+	return &models.User{
+		Id:       dbUser.Id.Hex(),
+		Username: dbUser.Username,
+		Password: dbUser.Password,
+	}, err
+}
+
+func CreateUser(username, password string) (string, error) {
+	objId, err := db.CreateUser(username, password)
+	return objId.Hex(), err
+}
+
+func GetAllArticles() ([]models.Article, error) {
+	dbArticles, err := db.GetAllArticles()
+	var articles []models.Article
+	for _, val := range dbArticles {
+		articles = append(articles, *convertArticle(&val))
+	}
+	return articles, err
+}
+
+func GetArticleById(id string) (*models.Article, error) {
+	a, err := db.GetArticleById(id)
+	if err != nil {
+		return nil, err
+	}
+	return convertArticle(a), err
+}
+
+func CreateArticle(title, text, userId string) (string, error) {
+	objId, err := db.CreateArticle(title, text, userId)
+	return objId.Hex(), err
 }
 
 func UpdateArticle(id, title, text string) error {
@@ -60,9 +60,9 @@ func UpdateArticle(id, title, text string) error {
 }
 
 func GetArticlesByUserId(userId string) ([]models.Article, error) {
-	arts, err := db.GetArticlesByUserId(userId)
+	dbArticles, err := db.GetArticlesByUserId(userId)
 	var articles []models.Article
-	for _, val := range arts {
+	for _, val := range dbArticles {
 		articles = append(articles, *convertArticle(&val))
 	}
 	return articles, err

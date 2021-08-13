@@ -143,7 +143,7 @@ func GetRouter() *mux.Router {
 			return
 		}
 		title, text := r.FormValue("title"), r.FormValue("text")
-		err := adapter.CreateArticle(title, text, userId)
+		_, err := adapter.CreateArticle(title, text, userId)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}

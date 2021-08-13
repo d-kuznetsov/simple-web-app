@@ -2,7 +2,6 @@ package db
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	//"github.com/d-kuznetsov/chat/config"
 )
 
 type User struct {

@@ -83,6 +83,9 @@ func CreateUser(username, password string) (primitive.ObjectID, error) {
 		Password: password,
 	}
 	res, err := collection.InsertOne(ctx, user)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
 	return res.InsertedID.(primitive.ObjectID), err
 }
 
@@ -126,7 +129,7 @@ func GetArticleById(id string) (*Article, error) {
 	return &article, nil
 }
 
-func CreateArticle(title, text, userId string) (*mongo.InsertOneResult, error) {
+func CreateArticle(title, text, userId string) (primitive.ObjectID, error) {
 	checkClient()
 	collection := client.Database("chat").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -138,7 +141,10 @@ func CreateArticle(title, text, userId string) (*mongo.InsertOneResult, error) {
 		User:  objId,
 	}
 	res, err := collection.InsertOne(ctx, article)
-	return res, err
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+	return res.InsertedID.(primitive.ObjectID), err
 }
 
 func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
