@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/d-kuznetsov/chat/adapter"
@@ -183,6 +184,38 @@ func GetRouter() *mux.Router {
 		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
+	}).Methods("POST")
+
+	router.HandleFunc("/my-articles", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated, userId := session.IsAuthenticated(r)
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		articles, err := adapter.GetArticlesOfUser(userId)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		RenderTemplate(w, "articlesOfUser", ArticleTmplOptions{
+			articles,
+			LayoutTmplOptions{IsAuthorized: true},
+		})
+	}).Methods("GET")
+
+	router.HandleFunc("/delete-articles", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated, _ := session.IsAuthenticated(r)
+		if !isAuthenticated {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+
+		r.ParseForm()
+		fmt.Printf("%+v\n", r.Form)
+		err := adapter.DeleteArticlesByIds(r.Form["articles"])
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
+		http.Redirect(w, r, "/my-articles", http.StatusFound)
 	}).Methods("POST")
 
 	return router

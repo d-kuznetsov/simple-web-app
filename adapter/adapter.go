@@ -58,3 +58,17 @@ func UpdateArticle(id, title, text string) error {
 	_, err := db.UpdateArticle(id, title, text)
 	return err
 }
+
+func GetArticlesOfUser(userId string) ([]models.Article, error) {
+	arts, err := db.GetArticlesOfUser(userId)
+	var articles []models.Article
+	for _, val := range arts {
+		articles = append(articles, *convertArticle(&val))
+	}
+	return articles, err
+}
+
+func DeleteArticlesByIds(ids []string) error {
+	_, err := db.DeleteArticlesByIds(ids)
+	return err
+}

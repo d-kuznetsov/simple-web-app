@@ -9,11 +9,12 @@ import (
 )
 
 var Templates = map[string]*template.Template{
-	"credentials":   template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
-	"articles":      template.Must(template.ParseFiles("templates/layout.html", "templates/articles.html")),
-	"article":       template.Must(template.ParseFiles("templates/layout.html", "templates/article.html")),
-	"createArticle": template.Must(template.ParseFiles("templates/layout.html", "templates/create-article.html")),
-	"updateArticle": template.Must(template.ParseFiles("templates/layout.html", "templates/update-article.html")),
+	"credentials":    template.Must(template.ParseFiles("templates/layout.html", "templates/credentials.html")),
+	"articles":       template.Must(template.ParseFiles("templates/layout.html", "templates/articles.html")),
+	"article":        template.Must(template.ParseFiles("templates/layout.html", "templates/article.html")),
+	"createArticle":  template.Must(template.ParseFiles("templates/layout.html", "templates/create-article.html")),
+	"updateArticle":  template.Must(template.ParseFiles("templates/layout.html", "templates/update-article.html")),
+	"articlesOfUser": template.Must(template.ParseFiles("templates/layout.html", "templates/my-articles.html")),
 }
 
 var RenderTemplate = func(w http.ResponseWriter, tmplName string, tmplData interface{}) {

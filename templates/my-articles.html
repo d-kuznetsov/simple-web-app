@@ -1,0 +1,29 @@
+{{define "content"}}
+<ul>
+  {{range .Articles}}
+  <li>
+    <a href="/articles/{{.Id}}">{{.Title}}</a>
+    <a href="/update-article/{{.Id}}">Update</a>
+  </li>
+  {{end}}
+</ul>
+<form action="/delete-articles" method="POST">
+  {{range .Articles}}
+  <div>
+    <input type="checkbox" id="to-delete" name="articles" value="{{ .Id }}" />
+    <label for="to-delete">{{ .Title }}</label>
+  </div>
+  {{end}}
+  <button type="submit">Delete</button>
+</form>
+{{end}}
+
+<div>
+  <input
+    type="checkbox"
+    id="subscribeNews"
+    name="subscribe"
+    value="newsletter"
+  />
+  <label for="subscribeNews">Subscribe to newsletter?</label>
+</div>

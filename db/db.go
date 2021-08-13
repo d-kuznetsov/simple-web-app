@@ -150,6 +150,60 @@ func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
 	res, err := collection.UpdateByID(ctx, objId, bson.D{
 		{"$set", bson.M{"title": title, "text": text}},
 	})
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("There are not any articles")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	fmt.Println("article was updated")
+	return res, err
+}
+
+func GetArticlesOfUser(userId string) ([]Article, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	objId, _ := primitive.ObjectIDFromHex(userId)
+	cursor, err := collection.Find(ctx, bson.M{"user": objId})
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("There are not any articles")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	var articles []Article
+	err = cursor.All(ctx, &articles)
+	if err != nil {
+		return nil, err
+	}
+	return articles, nil
+}
+
+func DeleteArticlesByIds(ids []string) (*mongo.DeleteResult, error) {
+	checkClient()
+	collection := client.Database("chat").Collection("articles")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	var objIds []primitive.ObjectID
+
+	for _, val := range ids {
+		objId, _ := primitive.ObjectIDFromHex(val)
+		objIds = append(objIds, objId)
+	}
+
+	res, err := collection.DeleteMany(ctx, bson.M{
+		"_id": bson.M{
+			"$in": objIds,
+		},
+	})
+	if err == mongo.ErrNoDocuments {
+		fmt.Println("There are not any articles")
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
 	fmt.Println("article was updated")
 	return res, err
 }
