@@ -1,222 +1,25 @@
 package router
 
 import (
-	"fmt"
-	"net/http"
-
-	"github.com/d-kuznetsov/chat/adapter"
-	"github.com/d-kuznetsov/chat/session"
 	"github.com/gorilla/mux"
 )
 
 func GetRouter() *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		articles, err := adapter.GetAllArticles()
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		RenderTemplate(w, "articles", ArticleTmplOptions{
-			articles,
-			LayoutTmplOptions{IsAuthorized: true},
-		})
-	}).Methods("GET")
-
-	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := adapter.FindUserByName(username)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		if user != nil && user.Password == password {
-			session.Login(w, r, user.Id)
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-		RenderTemplate(w, "credentials", CredentialsTmplOptions{
-			"Log In",
-			"/login",
-			username,
-			password,
-			"Username or password is incorrect",
-			LayoutTmplOptions{IsAuthorized: false},
-		})
-
-	}).Methods("POST")
-
-	router.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if isAuthenticated {
-			http.Redirect(w, r, "/", http.StatusFound)
-		}
-		RenderTemplate(w, "credentials", CredentialsTmplOptions{
-			Label:             "Log In",
-			Action:            "/login",
-			LayoutTmplOptions: LayoutTmplOptions{IsAuthorized: false},
-		})
-	}).Methods("GET")
-
-	router.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
-		username, password := r.FormValue("username"), r.FormValue("password")
-		user, err := adapter.FindUserByName(username)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		if user != nil {
-			RenderTemplate(w, "credentials", CredentialsTmplOptions{
-				"Sign Up",
-				"/signup",
-				username,
-				password,
-				"User with this username already exists",
-				LayoutTmplOptions{IsAuthorized: false},
-			})
-			return
-		}
-		userId, err := adapter.CreateUser(username, password)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		session.Login(w, r, userId)
-		http.Redirect(w, r, "/", http.StatusFound)
-	}).Methods("POST")
-
-	router.HandleFunc("/signup", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if isAuthenticated {
-			http.Redirect(w, r, "/", http.StatusFound)
-		}
-		RenderTemplate(w, "credentials", CredentialsTmplOptions{
-			Label:  "Sign Up",
-			Action: "/signup",
-			LayoutTmplOptions: LayoutTmplOptions{
-				IsAuthorized: false,
-			},
-		})
-	}).Methods("GET")
-
-	router.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		session.Logout(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
-	})
-
-	router.HandleFunc("/articles/{id}", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-		}
-		vars := mux.Vars(r)
-		article, err := adapter.GetArticleById(vars["id"])
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-
-		RenderTemplate(w, "article", OneArticleTmplOptions{
-			*article,
-			LayoutTmplOptions{IsAuthorized: true},
-		})
-
-	}).Methods("GET")
-
-	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-
-		RenderTemplate(w, "createArticle", LayoutTmplOptions{IsAuthorized: true})
-	}).Methods("GET")
-
-	router.HandleFunc("/create-article", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, userId := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		title, text := r.FormValue("title"), r.FormValue("text")
-		_, err := adapter.CreateArticle(title, text, userId)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		http.Redirect(w, r, "/", http.StatusFound)
-	}).Methods("POST")
-
-	router.HandleFunc("/update-article/{id}", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		vars := mux.Vars(r)
-		a, err := adapter.GetArticleById(vars["id"])
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		RenderTemplate(w, "updateArticle", OneArticleTmplOptions{
-			*a,
-			LayoutTmplOptions{IsAuthorized: true},
-		})
-	}).Methods("GET")
-
-	router.HandleFunc("/update-article", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, userId := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		id, title, text := r.FormValue("id"), r.FormValue("title"), r.FormValue("text")
-		a, _ := adapter.GetArticleById(id)
-		if a.User != userId {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		err := adapter.UpdateArticle(id, title, text)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-
-		http.Redirect(w, r, "/", http.StatusFound)
-	}).Methods("POST")
-
-	router.HandleFunc("/my-articles", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, userId := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		articles, err := adapter.GetArticlesByUserId(userId)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		RenderTemplate(w, "articlesOfUser", ArticleTmplOptions{
-			articles,
-			LayoutTmplOptions{IsAuthorized: true},
-		})
-	}).Methods("GET")
-
-	router.HandleFunc("/delete-articles", func(w http.ResponseWriter, r *http.Request) {
-		isAuthenticated, _ := session.IsAuthenticated(r)
-		if !isAuthenticated {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-
-		r.ParseForm()
-		fmt.Printf("%+v\n", r.Form)
-		err := adapter.DeleteArticlesByIds(r.Form["articles"])
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		}
-		http.Redirect(w, r, "/my-articles", http.StatusFound)
-	}).Methods("POST")
+	router.HandleFunc("/", ArticlesGetHandler).Methods("GET")
+	router.HandleFunc("/login", LogInPostHandler).Methods("POST")
+	router.HandleFunc("/login", LogInGetHandler).Methods("GET")
+	router.HandleFunc("/signup", SignUpPostHandler).Methods("POST")
+	router.HandleFunc("/signup", SignUpGetHandler).Methods("GET")
+	router.HandleFunc("/logout", LogOutHandler)
+	router.HandleFunc("/articles/{id}", OneArticleGetHandler).Methods("GET")
+	router.HandleFunc("/create-article", CreateArticleGetHandler).Methods("GET")
+	router.HandleFunc("/create-article", CreateArticlePostHandler).Methods("POST")
+	router.HandleFunc("/update-article/{id}", UpdateArticleGetHandler).Methods("GET")
+	router.HandleFunc("/update-article", UpdateArticlePostHandler).Methods("POST")
+	router.HandleFunc("/my-articles", ArticlesOfUserGetHandler).Methods("GET")
+	router.HandleFunc("/delete-articles", DeleteArticlesPostHandler).Methods("POST")
 
 	return router
 }
