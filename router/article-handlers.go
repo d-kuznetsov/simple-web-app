@@ -6,8 +6,30 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/d-kuznetsov/chat/adapter"
+	"github.com/d-kuznetsov/chat/models"
 	"github.com/d-kuznetsov/chat/session"
 )
+
+func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {
+	isAuthenticated, _ := session.IsAuthenticated(r)
+	if !isAuthenticated {
+		RedirectToLogIn(w, r)
+		return
+	}
+	articles, err := adapter.GetAllArticles()
+	if err != nil {
+		ThrowServerError(w)
+		return
+	}
+	data := struct {
+		Articles []models.Article
+		LayoutTmplOpts
+	}{
+		articles,
+		LayoutTmplOpts{IsAuthorized: true},
+	}
+	RenderTemplate(w, "articles", data)
+}
 
 func OneArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
@@ -21,10 +43,14 @@ func OneArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 		ThrowServerError(w)
 		return
 	}
-	RenderTemplate(w, "article", OneArticleTmplOptions{
+	data := struct {
+		models.Article
+		LayoutTmplOpts
+	}{
 		*article,
-		LayoutTmplOptions{IsAuthorized: true},
-	})
+		LayoutTmplOpts{IsAuthorized: true},
+	}
+	RenderTemplate(w, "article", data)
 }
 
 func CreateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +59,8 @@ func CreateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 		RedirectToLogIn(w, r)
 		return
 	}
-	RenderTemplate(w, "createArticle", LayoutTmplOptions{IsAuthorized: true})
+	data := struct{ LayoutTmplOpts }{LayoutTmplOpts{IsAuthorized: true}}
+	RenderTemplate(w, "createArticle", data)
 }
 
 func CreateArticlePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,15 +85,19 @@ func UpdateArticleGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	vars := mux.Vars(r)
-	a, err := adapter.GetArticleById(vars["id"])
+	article, err := adapter.GetArticleById(vars["id"])
 	if err != nil {
 		ThrowServerError(w)
 		return
 	}
-	RenderTemplate(w, "updateArticle", OneArticleTmplOptions{
-		*a,
-		LayoutTmplOptions{IsAuthorized: true},
-	})
+	data := struct {
+		models.Article
+		LayoutTmplOpts
+	}{
+		*article,
+		LayoutTmplOpts{IsAuthorized: true},
+	}
+	RenderTemplate(w, "updateArticle", data)
 }
 
 func UpdateArticlePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -101,10 +132,14 @@ func ArticlesOfUserGetHandler(w http.ResponseWriter, r *http.Request) {
 		ThrowServerError(w)
 		return
 	}
-	RenderTemplate(w, "articlesOfUser", ArticleTmplOptions{
+	data := struct {
+		Articles []models.Article
+		LayoutTmplOpts
+	}{
 		articles,
-		LayoutTmplOptions{IsAuthorized: true},
-	})
+		LayoutTmplOpts{IsAuthorized: true},
+	}
+	RenderTemplate(w, "myArticles", data)
 }
 
 func DeleteArticlesPostHandler(w http.ResponseWriter, r *http.Request) {

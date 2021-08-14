@@ -1,29 +1,23 @@
 {{define "content"}}
+<h3>My articles</h3>
 <ul>
   {{range .Articles}}
   <li>
     <a href="/articles/{{.Id}}">{{.Title}}</a>
-    <a href="/update-article/{{.Id}}">Update</a>
+    <a href="/update-article/{{.Id}}" class="button small">Update</a>
   </li>
   {{end}}
 </ul>
 <form action="/delete-articles" method="POST">
-  {{range .Articles}}
-  <div>
-    <input type="checkbox" id="to-delete" name="articles" value="{{ .Id }}" />
-    <label for="to-delete">{{ .Title }}</label>
-  </div>
-  {{end}}
-  <button type="submit">Delete</button>
+  <fieldset>
+    <legend>Delete articles</legend>
+    {{range .Articles}}
+    <div>
+      <input type="checkbox" id="to-delete" name="articles" value="{{ .Id }}" />
+      <label for="to-delete">{{ .Title }}</label>
+    </div>
+    {{end}}
+  </fieldset>
+  <button type="submit" class="secondary">Delete</button>
 </form>
 {{end}}
-
-<div>
-  <input
-    type="checkbox"
-    id="subscribeNews"
-    name="subscribe"
-    value="newsletter"
-  />
-  <label for="subscribeNews">Subscribe to newsletter?</label>
-</div>

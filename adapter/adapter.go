@@ -20,6 +20,9 @@ func convertArticle(a *db.Article) *models.Article {
 
 func FindUserByName(name string) (*models.User, error) {
 	dbUser, err := db.FindUserByName(name)
+	if err != nil || dbUser == nil {
+		return nil, err
+	}
 	return &models.User{
 		Id:       dbUser.Id.Hex(),
 		Username: dbUser.Username,

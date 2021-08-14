@@ -7,34 +7,14 @@ import (
 	"github.com/d-kuznetsov/chat/session"
 )
 
-func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {
-	isAuthenticated, _ := session.IsAuthenticated(r)
-	if !isAuthenticated {
-		RedirectToLogIn(w, r)
-		return
-	}
-	articles, err := adapter.GetAllArticles()
-	if err != nil {
-		ThrowServerError(w)
-		return
-	}
-	RenderTemplate(w, "articles", ArticleTmplOptions{
-		articles,
-		LayoutTmplOptions{IsAuthorized: true},
-	})
-}
-
 func LogInGetHandler(w http.ResponseWriter, r *http.Request) {
 	isAuthenticated, _ := session.IsAuthenticated(r)
 	if isAuthenticated {
 		RedirectToArticles(w, r)
 		return
 	}
-	RenderTemplate(w, "credentials", CredentialsTmplOptions{
-		Label:             "Log In",
-		Action:            "/login",
-		LayoutTmplOptions: LayoutTmplOptions{IsAuthorized: false},
-	})
+	data := struct{ LayoutTmplOpts }{LayoutTmplOpts: LayoutTmplOpts{IsAuthorized: false}}
+	RenderTemplate(w, "login", data)
 }
 
 func LogInPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,14 +29,10 @@ func LogInPostHandler(w http.ResponseWriter, r *http.Request) {
 		RedirectToArticles(w, r)
 		return
 	}
-	RenderTemplate(w, "credentials", CredentialsTmplOptions{
-		"Log In",
-		"/login",
-		username,
-		password,
-		"Username or password is incorrect",
-		LayoutTmplOptions{IsAuthorized: false},
-	})
+	data := struct{ LayoutTmplOpts }{
+		LayoutTmplOpts: LayoutTmplOpts{IsAuthorized: false, Error: "Username or password is incorrect"},
+	}
+	RenderTemplate(w, "login", data)
 }
 
 func SignUpGetHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,13 +41,10 @@ func SignUpGetHandler(w http.ResponseWriter, r *http.Request) {
 		RedirectToArticles(w, r)
 		return
 	}
-	RenderTemplate(w, "credentials", CredentialsTmplOptions{
-		Label:  "Sign Up",
-		Action: "/signup",
-		LayoutTmplOptions: LayoutTmplOptions{
-			IsAuthorized: false,
-		},
-	})
+	data := struct{ LayoutTmplOpts }{
+		LayoutTmplOpts: LayoutTmplOpts{IsAuthorized: false},
+	}
+	RenderTemplate(w, "signup", data)
 }
 
 func SignUpPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,14 +55,10 @@ func SignUpPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user != nil {
-		RenderTemplate(w, "credentials", CredentialsTmplOptions{
-			"Sign Up",
-			"/signup",
-			username,
-			password,
-			"User with this username already exists",
-			LayoutTmplOptions{IsAuthorized: false},
-		})
+		data := struct{ LayoutTmplOpts }{
+			LayoutTmplOpts: LayoutTmplOpts{IsAuthorized: false, Error: "User with this username already exists"},
+		}
+		RenderTemplate(w, "signup", data)
 		return
 	}
 	userId, err := adapter.CreateUser(username, password)
