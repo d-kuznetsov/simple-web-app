@@ -5,9 +5,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/d-kuznetsov/chat/adapter"
-	"github.com/d-kuznetsov/chat/models"
-	"github.com/d-kuznetsov/chat/session"
+	"github.com/d-kuznetsov/blog/adapter"
+	"github.com/d-kuznetsov/blog/models"
+	"github.com/d-kuznetsov/blog/session"
 )
 
 func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {

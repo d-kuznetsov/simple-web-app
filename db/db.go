@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/d-kuznetsov/chat/config"
+	"github.com/d-kuznetsov/blog/config"
 )
 
 var client *mongo.Client
@@ -60,7 +60,7 @@ func checkClient() {
 func FindUserByName(name string) (*User, error) {
 	checkClient()
 	var user User
-	collection := client.Database("chat").Collection("users")
+	collection := client.Database("blog").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	err := collection.FindOne(ctx, bson.M{"username": name}).Decode(&user)
@@ -75,7 +75,7 @@ func FindUserByName(name string) (*User, error) {
 
 func CreateUser(username, password string) (primitive.ObjectID, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("users")
+	collection := client.Database("blog").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	user := User{
@@ -91,7 +91,7 @@ func CreateUser(username, password string) (primitive.ObjectID, error) {
 
 func GetAllArticles() ([]*Article, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	cursor, err := collection.Find(ctx, bson.M{})
@@ -111,7 +111,7 @@ func GetAllArticles() ([]*Article, error) {
 
 func GetArticleById(id string) (*Article, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var article Article
@@ -131,7 +131,7 @@ func GetArticleById(id string) (*Article, error) {
 
 func CreateArticle(title, text, userId string) (primitive.ObjectID, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	objId, _ := primitive.ObjectIDFromHex(userId)
@@ -149,7 +149,7 @@ func CreateArticle(title, text, userId string) (primitive.ObjectID, error) {
 
 func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	objId, _ := primitive.ObjectIDFromHex(id)
@@ -167,7 +167,7 @@ func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
 
 func GetArticlesByUserId(userId string) ([]*Article, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	objId, _ := primitive.ObjectIDFromHex(userId)
@@ -188,7 +188,7 @@ func GetArticlesByUserId(userId string) ([]*Article, error) {
 
 func DeleteArticlesByIds(ids []string) (*mongo.DeleteResult, error) {
 	checkClient()
-	collection := client.Database("chat").Collection("articles")
+	collection := client.Database("blog").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	var objIds []primitive.ObjectID

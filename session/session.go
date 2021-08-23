@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/d-kuznetsov/chat/config"
+	"github.com/d-kuznetsov/blog/config"
 	"github.com/gorilla/sessions"
 )
 

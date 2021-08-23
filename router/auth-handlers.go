@@ -3,8 +3,8 @@ package router
 import (
 	"net/http"
 
-	"github.com/d-kuznetsov/chat/adapter"
-	"github.com/d-kuznetsov/chat/session"
+	"github.com/d-kuznetsov/blog/adapter"
+	"github.com/d-kuznetsov/blog/session"
 )
 
 func LogInGetHandler(w http.ResponseWriter, r *http.Request) {

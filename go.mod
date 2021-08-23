@@ -1,4 +1,4 @@
-module github.com/d-kuznetsov/chat
+module github.com/d-kuznetsov/blog
 
 go 1.16
 

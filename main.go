@@ -5,10 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/d-kuznetsov/chat/config"
-	"github.com/d-kuznetsov/chat/db"
-	"github.com/d-kuznetsov/chat/router"
-	"github.com/d-kuznetsov/chat/session"
+	"github.com/d-kuznetsov/blog/config"
+	"github.com/d-kuznetsov/blog/db"
+	"github.com/d-kuznetsov/blog/router"
+	"github.com/d-kuznetsov/blog/session"
 )
 
 func main() {

@@ -10,8 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/d-kuznetsov/chat/config"
-	"github.com/d-kuznetsov/chat/models"
+	"github.com/d-kuznetsov/blog/config"
+	"github.com/d-kuznetsov/blog/models"
 )
 
 func main() {
@@ -32,11 +32,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = client.Database("chat").Drop(ctx)
+	err = client.Database("blog").Drop(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	userCollection := client.Database("chat").Collection("users")
+	userCollection := client.Database("blog").Collection("users")
 	users := []interface{}{
 		models.User{Username: "jennifer", Password: "1234"},
 		models.User{Username: "joey", Password: "1234"},
@@ -46,7 +46,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("Inserted users: ", insertResult.InsertedIDs)
-	articleCollection := client.Database("chat").Collection("articles")
+	articleCollection := client.Database("blog").Collection("articles")
 	articles := []interface{}{
 		models.Article{
 			Title: "Golang",

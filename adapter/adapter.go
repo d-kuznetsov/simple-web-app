@@ -1,8 +1,8 @@
 package adapter
 
 import (
-	"github.com/d-kuznetsov/chat/db"
-	"github.com/d-kuznetsov/chat/models"
+	"github.com/d-kuznetsov/blog/db"
+	"github.com/d-kuznetsov/blog/models"
 )
 
 func convertArticle(a *db.Article) *models.Article {
