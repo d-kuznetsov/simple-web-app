@@ -6,29 +6,16 @@ import (
 	"log"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	//"github.com/d-kuznetsov/chat/config"
+
+	"github.com/d-kuznetsov/chat/config"
+	"github.com/d-kuznetsov/chat/models"
 )
 
-type User struct {
-	Id       primitive.ObjectID `bson:"_id,omitempty"`
-	Username string             `bson:"username,omitempty"`
-	Password string             `bson:"password,omitempty"`
-}
-
-type Article struct {
-	Id    primitive.ObjectID `bson:"_id,omitempty"`
-	Title string             `bson:"title,omitempty"`
-	Date  string             `bson:"date,omitempty"`
-	Text  string             `bson:"text,omitempty"`
-	User  primitive.ObjectID `bson:"user,omitempty"`
-}
-
 func main() {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.NewClient(options.Client().ApplyURI(config.MongoURI))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,8 +38,8 @@ func main() {
 	}
 	userCollection := client.Database("chat").Collection("users")
 	users := []interface{}{
-		User{Username: "vanya", Password: "1234"},
-		User{Username: "katya", Password: "1234"},
+		models.User{Username: "jennifer", Password: "1234"},
+		models.User{Username: "joey", Password: "1234"},
 	}
 	insertResult, err := userCollection.InsertMany(ctx, users)
 	if err != nil {
@@ -61,25 +48,25 @@ func main() {
 	fmt.Println("Inserted users: ", insertResult.InsertedIDs)
 	articleCollection := client.Database("chat").Collection("articles")
 	articles := []interface{}{
-		Article{
+		models.Article{
 			Title: "Golang",
-			User:  insertResult.InsertedIDs[0].(primitive.ObjectID),
+			User:  insertResult.InsertedIDs[0].(string),
 		},
-		Article{
+		models.Article{
 			Title: "JavaScript",
-			User:  insertResult.InsertedIDs[1].(primitive.ObjectID),
+			User:  insertResult.InsertedIDs[1].(string),
 		},
-		Article{
+		models.Article{
 			Title: "Python",
-			User:  insertResult.InsertedIDs[1].(primitive.ObjectID),
+			User:  insertResult.InsertedIDs[1].(string),
 		},
-		Article{
+		models.Article{
 			Title: "Rust",
-			User:  insertResult.InsertedIDs[0].(primitive.ObjectID),
+			User:  insertResult.InsertedIDs[0].(string),
 		},
-		Article{
+		models.Article{
 			Title: "Scala",
-			User:  insertResult.InsertedIDs[1].(primitive.ObjectID),
+			User:  insertResult.InsertedIDs[0].(string),
 		},
 	}
 	insertResult, err = articleCollection.InsertMany(ctx, articles)
