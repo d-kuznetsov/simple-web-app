@@ -35,11 +35,11 @@ func CreateUser(username, password string) (string, error) {
 	return objId.Hex(), err
 }
 
-func GetAllArticles() ([]models.Article, error) {
+func GetAllArticles() ([]*models.Article, error) {
 	dbArticles, err := db.GetAllArticles()
-	var articles []models.Article
+	var articles []*models.Article
 	for _, val := range dbArticles {
-		articles = append(articles, *convertArticle(&val))
+		articles = append(articles, convertArticle(val))
 	}
 	return articles, err
 }
@@ -62,11 +62,11 @@ func UpdateArticle(id, title, text string) error {
 	return err
 }
 
-func GetArticlesByUserId(userId string) ([]models.Article, error) {
+func GetArticlesByUserId(userId string) ([]*models.Article, error) {
 	dbArticles, err := db.GetArticlesByUserId(userId)
-	var articles []models.Article
+	var articles []*models.Article
 	for _, val := range dbArticles {
-		articles = append(articles, *convertArticle(&val))
+		articles = append(articles, convertArticle(val))
 	}
 	return articles, err
 }

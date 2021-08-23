@@ -22,7 +22,7 @@ func ArticlesGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := struct {
-		Articles []models.Article
+		Articles []*models.Article
 		LayoutTmplOpts
 	}{
 		articles,
@@ -133,7 +133,7 @@ func ArticlesOfUserGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data := struct {
-		Articles []models.Article
+		Articles []*models.Article
 		LayoutTmplOpts
 	}{
 		articles,

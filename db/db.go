@@ -89,7 +89,7 @@ func CreateUser(username, password string) (primitive.ObjectID, error) {
 	return res.InsertedID.(primitive.ObjectID), err
 }
 
-func GetAllArticles() ([]Article, error) {
+func GetAllArticles() ([]*Article, error) {
 	checkClient()
 	collection := client.Database("chat").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -101,7 +101,7 @@ func GetAllArticles() ([]Article, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	var articles []Article
+	var articles []*Article
 	err = cursor.All(ctx, &articles)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func UpdateArticle(id, title, text string) (*mongo.UpdateResult, error) {
 	return res, err
 }
 
-func GetArticlesByUserId(userId string) ([]Article, error) {
+func GetArticlesByUserId(userId string) ([]*Article, error) {
 	checkClient()
 	collection := client.Database("chat").Collection("articles")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -178,7 +178,7 @@ func GetArticlesByUserId(userId string) ([]Article, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	var articles []Article
+	var articles []*Article
 	err = cursor.All(ctx, &articles)
 	if err != nil {
 		return nil, err
