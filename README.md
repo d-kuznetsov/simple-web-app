@@ -1,0 +1,1 @@
+## Simple example of using CRUD operations with MongoDB database
